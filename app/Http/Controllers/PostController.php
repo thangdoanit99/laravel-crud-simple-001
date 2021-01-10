@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\CreatePostRequest;
+
 use App\Post;
 
 class PostController extends Controller
@@ -12,9 +14,12 @@ class PostController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+
+
     public function index()
     {
-        $posts = Post::all();
+        $posts = Post::latest()->get();
 
         return view('posts.index', compact('posts'));
     }
@@ -35,7 +40,8 @@ class PostController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    // public function store(CreatePostRequest $request)
+    public function store(CreatePostRequest $request)
     {
 
         $post = new Post;
@@ -45,6 +51,20 @@ class PostController extends Controller
         $post->content = $request->content;
 
         $post->save();
+
+        $post_id = Post::find($post->id);
+
+        if ($files = $request->file('files')) {
+
+            foreach ($files as $file) {
+
+                $name = $file->getClientOriginalName();
+
+                $file->move('images', $name);
+
+                $post_id->photos()->create(['path' => $name]);
+            }
+        }
 
         return redirect()->route('posts.index');
     }
@@ -58,7 +78,8 @@ class PostController extends Controller
     public function show($id)
     {
         $post = Post::findOrFail($id);
-        return view('posts.show', compact('post', 'id'));
+        $photos = $post->photos()->get();
+        return view('posts.show', compact('post', 'photos'));
     }
 
     /**

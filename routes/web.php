@@ -6,6 +6,7 @@ use App\Post;
 use App\User;
 use App\Role;
 use App\Photo;
+use Carbon\Carbon;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -21,7 +22,19 @@ Route::get('/', function () {
     return view('layouts.app');
 });
 
-Route::resource('posts', 'PostController');
+Route::middleware(['web'])->group(function () {
+    Route::resource('posts', 'PostController');
+
+
+    Route::get('/dates', function () {
+        $date = new DateTime('+1 week');
+
+        echo $date->format('m-d-Y') . '<br/>';
+
+        echo Carbon::now()->addDays(30)->diffForHumans();
+    });
+});
+
 
 // |--------------------------------------------------------------------------
 // | DB

@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Post extends Model
 {
     use SoftDeletes;
+
+    public $directory = "/images/";
     protected $table = 'posts';
     protected $primaryKey = 'id';
-    protected $fillable = ['title', 'content'];
+    protected $fillable = ['title', 'content', 'image'];
     protected $dates = ['deleted_at'];
 
     public function user()
@@ -21,5 +23,10 @@ class Post extends Model
     public function photos()
     {
         return $this->morphMany(Photo::class, 'imageable');
+    }
+
+    public function scopeLatest($query)
+    {
+        return $query->orderBy('created_at', 'desc');
     }
 }
